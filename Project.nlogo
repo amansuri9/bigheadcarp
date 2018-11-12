@@ -1,40 +1,71 @@
-patches-own[iterations]
-to setup
+patches-own[plankton zone]
+
+turtles-own [
+    energy
+    cruise-speed
+    wiggle-angle
+    turn-angle
+    metabolism
+    birth-energy
+  drag-factor
+  age]
+
+globals [
+    starvations
+    kills
+    mean-energy
+  safe
+    ]
+
+breed [bighead
+  bigheads]
+
+breed [normal
+  normals]
+
+breed [speaker
+  speakers]
+
+speaker-own [noise-radius noise-sight-range]
+
+
+
+to setup ;;setting up the field, blue is water green is plankton patches;;
   clear-all
   ask patches [
-    ;; setup a default sized field conisting that are all green
+    ;;
     set pcolor blue
-    ;; infects 10% of the cells out of 100%
+    ;;
     if random 100 < 3[
       ;; setting the cell to black when it is infected
       set pcolor green
     ]
     ;; setting up speakers
-    ask (patch 8 -16) [
+    ask (patch 25 -16) [
       set pcolor black
     ]
-    ask (patch 8 16) [
+    ask (patch 25 16) [
       set pcolor black
     ]
-    ask (patch 8 0) [
+    ask (patch 25 0) [
      set pcolor black
     ]
-    ask (patch 8 -8) [
+    ask (patch 25 -8) [
       set pcolor black
     ]
-    ask (patch 8 8) [
+    ask (patch 25 8) [
       set pcolor black
     ]
-    ask (patch 8 -12) [
+    ask (patch 25 -12) [
       set pcolor black
     ]
-    ask (patch 8 12) [
+    ask (patch 25 12) [
       set pcolor black
     ]
-    ask (patch 8 -4) [
+    ask (patch 25 -4) [
       set pcolor black
     ]
-    ask (patch 8 4) [
+    ask (patch 25 4) [
       set pcolor black
     ]
     ;; setting up speakers
@@ -47,12 +78,15 @@ create-turtles choose-normal-fish [
     setxy random-xcor random-ycor
     set shape "fish"
     set size 1
-    ;; set normal fish to all colors except for gray so no confusion between asian carp
-    set color one-of remove gray base-colors
+   set cruise-speed 3
+    set wiggle-angle 5
+    set turn-angle 10
+    ;set birth energy 25
+    set energy random-float 100
+    set age random 200
+    set shape "fish"
     ;; turtle is now facing northeast
     set heading 90
-    ;; movement heading down or up
-    set heading one-of [70 90 130]
   ]
 
  ;; creating bighead fish
@@ -60,14 +94,18 @@ create-turtles choose-bighead-fish [
     ;; set x and y coordinates for random fish location
     setxy random-xcor random-ycor
     set shape "fish"
-    ;; set asian carp as gray fish
-    set color grey
-    ;; making bighead bigger
     set size 2
+    set color grey
+    set cruise-speed 3
+    set wiggle-angle 5
+    set turn-angle 10
+    ;set birth energy 25
+    set energy random-float 100
+    set age random 200
+    set shape "fish"
     ;; turtle is now facing northeast
     set heading 90
-    ;; movement heading up or down
-    set heading one-of [70 90 130]
+
   ]
 end
 
@@ -78,12 +116,121 @@ to move-fish
 [forward 0.5]
   tick
 end
+
+
+to plankton_growth
+   ask patches [
+       if (plankton < 5) [
+           set plankton plankton  + 1 ;plankton-growth-rate   ;growth rate on slider between 0 and 2 maybe
+           ]
+       ]
+   diffuse plankton 1
+;; scale the color of the patches to reflect the quantity of plankton on each patch
+   ask patches [ ifelse (zone = safe) [
+       set pcolor green
+   ]
+   [
+     set pcolor scale-color turquoise plankton 6 0
+   ]
+     ]
+end
+
+to cruise
+   rt random wiggle-angle
+   lt random wiggle-angle
+   fd cruise-speed
+   set energy energy - cruise-speed * drag-factor
+end
+
+to birth
+    if (energy > 2 * birth-energy) [
+        set energy energy - birth-energy
+        hatch 1 [
+           set energy birth-energy
+           set heading random 360
+           fd cruise-speed ] ]
+end
+
+
+to death_bighead
+  ;; check for metabolic death
+    if energy < 0 [
+        if (breed = bighead)
+            [set starvations starvations + 1]
+        die ]
+end
+
+to death_normal
+ ;;check for metabolic death
+    if energy < 0 [
+        if (breed = normal)
+        [set starvations starvations + 1]
+        die ]
+end
+
+to feed_bighead ;;bighead eat more plankton
+    if (plankton > 1) [
+        set energy energy + 1 ;bighead_energy
+        set plankton plankton - 5]
+end
+
+to feed_normal ;;normal eat less plankton
+    if (plankton > 1) [
+        set energy energy + 1 ;normal_energy
+        set plankton plankton - 3 ]
+end
+
+to go ;; main procedure
+;;  plankton growth. If there is less than the threshold amount of plankton on a patch regrow it with a particular probability determined
+;; by the growth rate. We also diffuse the plankton to allow for the fact that plankton drift.
+
+  ask patches [
+       if (plankton < 5) [
+           ;if ((random-float 100) < plankton-growth-rate) [
+           ;   set plankton plankton  + 1  ]
+           set plankton plankton  + 1 ;plankton-growth-rate   ;growth rate on slider between 0 and 2 maybe
+           ]
+       ]
+  diffuse plankton 1
+;; scale the color of the patches to reflect the quantity of plankton on each patch
+   ask patches [ ifelse (zone = safe) [
+       set pcolor green
+   ]
+   [
+     set pcolor scale-color turquoise plankton 6 0
+   ]
+     ]
+
+;; main fish procedures
+  ask bighead [swim feed_bighead birth death_bighead]
+  ask normal [swim feed_normal birth death_normal]
+  ask speaker [produce-noise]
+
+end
+
+to swim
+        set energy energy - metabolism
+        let noise speaker in-cone noise-radius noise-sight-range
+        ifelse ((any? noise) and escaping?)
+          [set turn-angle herring-turn-angle * 3  ;; the turn angle for escaping is larger than normal by a factor of 3
+           avoid min-one-of noise [distance myself ]
+            fd escape-speed
+            set energy energy - escape-speed * drag-factor ]
+          [ifelse schooling? [school][cruise]
+      ]
+end
+
+to produce-noise
+end
+
+
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
 10
-647
-448
+1401
+552
 -1
 -1
 13.0
@@ -93,13 +240,13 @@ GRAPHICS-WINDOW
 1
 1
 0
+0
+0
 1
-1
-1
--16
-16
--16
-16
+-45
+45
+-20
+20
 0
 0
 1
@@ -132,7 +279,7 @@ choose-normal-fish
 choose-normal-fish
 0
 50
-12.0
+1.0
 1
 1
 NIL
@@ -164,11 +311,28 @@ choose-bighead-fish
 choose-bighead-fish
 0
 50
-9.0
+1.0
 1
 1
 NIL
 HORIZONTAL
+
+BUTTON
+26
+261
+149
+294
+NIL
+setup_perimeter
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
