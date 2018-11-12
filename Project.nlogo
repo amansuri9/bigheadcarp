@@ -2,6 +2,7 @@ patches-own[iterations]
 to setup
   clear-all
   ask patches [
+    ;; test
     ;; setup a default sized field conisting that are all green
     set pcolor blue
     ;; infects 10% of the cells out of 100%
