@@ -16,6 +16,27 @@ to setup
     ask (patch 8 16) [
       set pcolor black
     ]
+    ask (patch 8 0) [
+     set pcolor black
+    ]
+    ask (patch 8 -8) [
+      set pcolor black
+    ]
+    ask (patch 8 8) [
+      set pcolor black
+    ]
+    ask (patch 8 -12) [
+      set pcolor black
+    ]
+    ask (patch 8 12) [
+      set pcolor black
+    ]
+    ask (patch 8 -4) [
+      set pcolor black
+    ]
+    ask (patch 8 4) [
+      set pcolor black
+    ]
     ;; setting up speakers
      ;; if pycor = -16 [
      ;; set pcolor black
