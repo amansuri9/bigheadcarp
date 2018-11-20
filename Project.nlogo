@@ -1,78 +1,120 @@
-patches-own[iterations]
+patches-own[plankton zone]
+;; These are all needed by each turtle (both bighead and normals).
+;; Defining the variables belonging to each turtle.
+
+;; Turtles own the energy, cruise-speed, wiggle-angle, turn-angle, metabolism, birth-energy, drag-factor and age.
+turtles-own [
+    energy
+    cruise-speed
+    wiggle-angle
+    turn-angle
+    metabolism
+    birth-energy
+    drag-factor
+    age]
+
+;; global variables allow tracking of each of the below things in graphs, we can add more of these or remove some that we need.
+;; the one notable one 'safe' is tracking if the fish have encountered the speakers or if they have been 'hit' by the speakers.
+globals [
+    starvations
+    kills
+    mean-energy
+    safe
+    ]
+
+;; breeds allow us to apply overarching procedures to each of the different fishes and to the speakers,
+;; this will allow us to later use plural forms in addressing them in code
+breed [bigheads bighead]
+breed [normals normal]
+breed [speakers speaker]
+;; speakers will own their own procedures as they will be acting as independent structures,
+;;sort of like sudo-turtles these speakers will be set as turtles but will not move
+speakers-own [noise-radius noise-sight-range]
+
+
+;; the below code might not be needed as the field is populated by plankton, look below for their individual attributes
+;; setting up the field, blue is water green is plankton patches
 to setup
   clear-all
   ask patches [
-    ;; test
-    ;; test2
-    ;; setup a default sized field conisting that are all green
+    ;;
     set pcolor blue
-    ;; infects 10% of the cells out of 100%
+    ;;
     if random 100 < 3[
-      ;; setting the cell to black when it is infected
+      ;; setting the cell to green for plankton
       set pcolor green
     ]
     ;; setting up speakers
-    ask (patch 8 -16) [
+    ask (patch 25 -16) [
       set pcolor black
     ]
-    ask (patch 8 16) [
+    ask (patch 25 16) [
       set pcolor black
     ]
-    ask (patch 8 0) [
+    ask (patch 25 0) [
      set pcolor black
     ]
-    ask (patch 8 -8) [
+    ask (patch 25 -8) [
       set pcolor black
     ]
-    ask (patch 8 8) [
+    ask (patch 25 8) [
       set pcolor black
     ]
-    ask (patch 8 -12) [
+    ask (patch 25 -12) [
       set pcolor black
     ]
-    ask (patch 8 12) [
+    ask (patch 25 12) [
       set pcolor black
     ]
-    ask (patch 8 -4) [
+    ask (patch 25 -4) [
       set pcolor black
     ]
-    ask (patch 8 4) [
+    ask (patch 25 4) [
       set pcolor black
     ]
-    ;; setting up speakers
-     ;; if pycor = -16 [
-     ;; set pcolor black
   ]
- ;; creating normal fish
-create-turtles choose-normal-fish [
+
+;; Code from here up may need to be omitted;;
+
+  ;; Creating normal fish
+  create-normals choose-normal-fish [
     ;; set x and y coordinates for random fish location
     setxy random-xcor random-ycor
     set shape "fish"
     set size 1
-    ;; set normal fish to all colors except for gray so no confusion between asian carp
+    ;; set normal fish to all colors except for gray so no confusion
     set color one-of remove gray base-colors
+    set cruise-speed 3 ; cruise speed is the fishes normal swim speed;
+    set wiggle-angle 5 ; this will be used to apply 'normal' movement, to simulate some sort of swimming behavior
+    set turn-angle 10 ; turn angle allows us to redirect the fish, this needs to be given a new number, so when the fish encouter the stimuli they will turn at this angle, a range of angles can also be added here;;
+    ;set birth energy 25 ;; birth energy is a global variable tracked to allow us to spawn more fish
+    set energy random-float 100 ;; this energy corresponds to the fishes life, they gain it by eating, they lose it by swimming, they die if its at a user specified point;;
+    set age random 200 ;; age will allow us to kill old fish, still not working yet but will be up and running soon;
+    set shape "fish"
     ;; turtle is now facing northeast
-    set heading 90
-    ;; movement heading down or up
-    set heading one-of [70 90 130]
+    set heading 90 ; points the fish in a general direction when they are spawned, this is altered if we want to stimulate a fast or a slow stream.
   ]
 
- ;; creating bighead fish
-create-turtles choose-bighead-fish [
+  ;; Creating bighead fish, attributes are same as above.
+  create-bigheads choose-bighead-fish [
     ;; set x and y coordinates for random fish location
     setxy random-xcor random-ycor
     set shape "fish"
-    ;; set asian carp as gray fish
-    set color grey
     ;; making bighead bigger
     set size 2
+    set color grey
+    set cruise-speed 3
+    set wiggle-angle 5
+    set turn-angle 10
+    ;set birth energy 25
+    set energy random-float 100
+    set age random 200
+    set shape "fish"
     ;; turtle is now facing northeast
     set heading 90
-    ;; movement heading up or down
-    set heading one-of [70 90 130]
-  ]
+    ]
 end
-
+;; this is something else that we may want to remove later, the moving complex is a tad more complicated.
 to move-fish
   reset-ticks
   ask turtles
@@ -80,12 +122,130 @@ to move-fish
 [forward 0.5]
   tick
 end
+
+;; this procedure grows the plankton;;
+to plankton_growth
+   ask patches [
+       if (plankton < 5) [
+           set plankton plankton  + 1 ;plankton-growth-rate   ;growth rate on slider between 0 and 2 maybe
+           ]
+       ];; this will allow plankton to grow on patches that are not filled with plankton;;
+   diffuse plankton 1 ;; this allows the plankton to 'diffuse' or move and drift which is congruent with how real world plankton move, with the waves and water;;
+;; scale the color of the patches to reflect the quantity of plankton on each patch
+   ask patches [ ifelse (zone = safe) [
+       set pcolor green;; zone is safe if not around speaker;;
+   ]
+   [
+     set pcolor scale-color turquoise plankton 6 0 ;; this will color all the patches from blue to green depending on the plankton that are on the patches;
+   ]
+     ]
+end
+
+to cruise ;; this is to allow the fish to move. energy is set and subtracted here;;
+   rt random wiggle-angle
+   lt random wiggle-angle
+   fd cruise-speed
+   set energy energy - cruise-speed * drag-factor
+end
+
+to birth ;; this birth is to spawn new fish and spawns them in a random direction;
+    if (energy > 2 * birth-energy) [
+        set energy energy - birth-energy
+        hatch 1 [
+           set energy birth-energy
+           set heading random 360
+           fd cruise-speed ] ]
+end
+
+
+to death_bigheads;; killing the bigheads if they are at zero energy;
+  ;; check for metabolic death
+    if energy < 0 [
+        if (breed = bigheads)
+            [set starvations starvations + 1]
+        die ]
+;; need to add a die from old age here;;
+end
+
+to death_normals
+ ;;check for metabolic death
+    if energy < 0 [
+        if (breed = normals)
+        [set starvations starvations + 1]
+        die ]
+end
+
+;;; the following are the feeding procedures for the fishes to eat shit;;
+
+to feed_bigheads ;;bighead eat more plankton
+    if (plankton > 1) [
+        set energy energy + 1 ;bighead_energy
+        set plankton plankton - 5]
+end
+
+to feed_normals ;;normal eat less plankton
+    if (plankton > 1) [
+        set energy energy + 1 ;normal_energy
+        set plankton plankton - 3 ]
+end
+
+to produce-noise ;; this needs to be some sort of resonating thing or added a probability for them to be transparaent at some tiems and have them blink;;
+ask patches [
+    if (pcolor = black)
+    [set pcolor red]
+  ]
+ask bigheads [
+    ;; turn red but originally will turn around and leave
+    set heading random 360
+    ]
+end
+
+to swim
+        set energy energy - metabolism
+;        let noise speakers in-cone noise-radius noise-sight-range ;; this is supposed to deter the fish if they are around the speakers;;
+;        ifelse ((any? noise) and escaping);; escaping is them running from a speaker, does this need to be a new procedure? idk;;
+;          [set turn-angle herring-turn-angle * 3  ;; the turn angle for escaping is larger than normal by a factor of 3
+;           avoid min-one-of noise [distance myself ]
+;            fd escape-speed
+;            set energy energy - escape-speed * drag-factor ]
+;          [ifelse schooling? [school][cruise]
+;      ]
+end
+
+;; later on going to call all the fish procedures and cycles
+to go
+;;  plankton growth. If there is less than the threshold amount of plankton on a patch regrow it with a particular probability determined
+;; by the growth rate. We also diffuse the plankton to allow for the fact that plankton drift.
+  ask patches [
+       if (plankton < 5) [
+;           if ((random-float 100) < plankton-growth-rate) [
+;              set plankton plankton  + 1  ]
+           set plankton plankton  + 1 ;plankton-growth-rate   ;growth rate on slider between 0 and 2 maybe
+           ]
+       ]
+  diffuse plankton 1
+;; scale the color of the patches to reflect the quantity of plankton on each patch
+;   ask patches [ ifelse (zone = safe) [
+;       set pcolor green
+;   ]
+;   [
+;     set pcolor scale-color turquoise plankton 6 0
+;   ]
+;     ]
+
+;; main fish procedures
+  ask bigheads [swim feed_bigheads birth death_bigheads]
+  ask normals [swim feed_normals birth death_normals]
+  produce-noise
+
+end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
 10
-647
-448
+1401
+552
 -1
 -1
 13.0
@@ -95,13 +255,13 @@ GRAPHICS-WINDOW
 1
 1
 0
+0
+0
 1
-1
-1
--16
-16
--16
-16
+-45
+45
+-20
+20
 0
 0
 1
@@ -134,7 +294,7 @@ choose-normal-fish
 choose-normal-fish
 0
 50
-12.0
+6.0
 1
 1
 NIL
@@ -166,11 +326,62 @@ choose-bighead-fish
 choose-bighead-fish
 0
 50
-9.0
+6.0
 1
 1
 NIL
 HORIZONTAL
+
+BUTTON
+43
+240
+179
+273
+NIL
+plankton_growth
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+43
+277
+187
+310
+reproduce and die
+go
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+47
+322
+171
+355
+NIL
+produce-noise
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
