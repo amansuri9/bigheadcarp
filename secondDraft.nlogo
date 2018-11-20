@@ -43,7 +43,8 @@ to setup
     if random 100 < 3[
       ;; setting the cell to green for plankton
       set pcolor green
-    ]
+      ]
+
     ;; setting up speakers
     ask (patch 25 -16) [
       set pcolor black
@@ -128,23 +129,24 @@ to plankton_growth
    ask patches [
        if (plankton < 5) [
            set plankton plankton  + 1 ;plankton-growth-rate   ;growth rate on slider between 0 and 2 maybe
-           ]
-       ];; this will allow plankton to grow on patches that are not filled with plankton;;
-   diffuse plankton 1 ;; this allows the plankton to 'diffuse' or move and drift which is congruent with how real world plankton move, with the waves and water;;
+    ]
+       ];; this will allow plankton to grow on patches that are not filled with ;;
+   diffuse plankton .0001 ;; this allows the plankton to 'diffuse' or move and drift which is congruent with how real world plankton move, with the waves and water;;
 ;; scale the color of the patches to reflect the quantity of plankton on each patch
-   ask patches [ ifelse (zone = safe) [
-       set pcolor green;; zone is safe if not around speaker;;
-   ]
-   [
-     set pcolor scale-color turquoise plankton 6 0 ;; this will color all the patches from blue to green depending on the plankton that are on the patches;
-   ]
-     ]
+;   ask patches [ ifelse (zone = safe) [
+;       set pcolor green;; zone is safe if not around speaker;;
+;   ]
+;   [
+;     set pcolor scale-color turquoise plankton 6 0 ;; this will color all the patches from blue to green depending on the plankton that are on the patches;
+;   ]
+;     ]
 end
 
 to cruise ;; this is to allow the fish to move. energy is set and subtracted here;;
    rt random wiggle-angle
    lt random wiggle-angle
    fd cruise-speed
+  forward 0.5
    set energy energy - cruise-speed * drag-factor
 end
 
@@ -234,10 +236,19 @@ to go
 ;     ]
 
 ;; main fish procedures
-  ask bigheads [swim feed_bigheads birth death_bigheads]
-  ask normals [swim feed_normals birth death_normals]
+  ask bigheads [swim feed_bigheads death_bigheads]
+  ask normals [swim feed_normals  death_normals ]
+  ;; base speed
+  ask turtles [
+    cruise
+  ]
   produce-noise
 
+end
+
+to reproduce
+    ask bigheads [birth ]
+  ask normals [birth ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -353,7 +364,7 @@ BUTTON
 277
 187
 310
-reproduce and die
+movement
 go
 NIL
 1
@@ -372,6 +383,23 @@ BUTTON
 355
 NIL
 produce-noise
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+60
+368
+156
+401
+NIL
+reproduce
 NIL
 1
 T
