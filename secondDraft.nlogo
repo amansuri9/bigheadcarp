@@ -116,13 +116,13 @@ to setup
     ]
 end
 ;; this is something else that we may want to remove later, the moving complex is a tad more complicated.
-to move-fish
-  reset-ticks
-  ask turtles
-  ;; setting the pace of the fish moving
-[forward 0.5]
-  tick
-end
+;to move-fish
+;  reset-ticks
+;  ask turtles
+;  ;; setting the pace of the fish moving
+;[forward 0.5]
+;  tick
+;end
 
 ;; this procedure grows the plankton;;
 to plankton_growth
@@ -142,11 +142,14 @@ to plankton_growth
 ;     ]
 end
 
+;; tracking the movement of the fish
 to cruise ;; this is to allow the fish to move. energy is set and subtracted here;;
    rt random wiggle-angle
    lt random wiggle-angle
    fd cruise-speed
-  forward 0.5
+   forward 0.5
+  ;; this is what makes the fish go any direction and give the movement we wanted originally! yayy finally
+   set heading random 360
    set energy energy - cruise-speed * drag-factor
 end
 
@@ -198,7 +201,7 @@ ask patches [
   ]
 ask bigheads [
     ;; turn red but originally will turn around and leave
-    set heading random 360
+    set heading -90
     ]
 end
 
@@ -214,8 +217,15 @@ to swim
 ;      ]
 end
 
-;; later on going to call all the fish procedures and cycles
-to go
+;; reproducing fish
+to reproduce
+    ask bigheads [birth ]
+  ask normals [birth ]
+end
+
+;; GO BUTTON when speakers are NOT activated
+;;;;;;;;;;;
+to move-with-speakers-off
 ;;  plankton growth. If there is less than the threshold amount of plankton on a patch regrow it with a particular probability determined
 ;; by the growth rate. We also diffuse the plankton to allow for the fact that plankton drift.
   ask patches [
@@ -236,20 +246,24 @@ to go
 ;     ]
 
 ;; main fish procedures
-  ask bigheads [swim feed_bigheads death_bigheads]
-  ask normals [swim feed_normals  death_normals ]
+  ask bigheads [feed_bigheads death_bigheads]
+  ask normals [feed_normals  death_normals ]
   ;; base speed
   ask turtles [
     cruise
   ]
+end
+
+;; GO BUTTON when speakers are activated
+;;;;;;;;;;;;;
+to move-with-speakers-on
+
+  ask turtles [
+    cruise
+  ]
   produce-noise
-
 end
 
-to reproduce
-    ask bigheads [birth ]
-  ask normals [birth ]
-end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -304,49 +318,32 @@ choose-normal-fish
 choose-normal-fish
 0
 50
-6.0
+7.0
 1
 1
 NIL
 HORIZONTAL
 
-BUTTON
-60
-141
-176
-174
-go
-move-fish
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
 SLIDER
 18
-197
+131
 203
-230
+164
 choose-bighead-fish
 choose-bighead-fish
 0
 50
-6.0
+7.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-43
-240
-179
-273
+45
+174
+181
+207
 NIL
 plankton_growth
 NIL
@@ -360,12 +357,12 @@ NIL
 1
 
 BUTTON
-43
-277
-187
-310
-movement
-go
+-2
+252
+213
+285
+go when speakers off 
+move-with-speakers-off
 NIL
 1
 T
@@ -377,10 +374,10 @@ NIL
 1
 
 BUTTON
-47
-322
-171
-355
+44
+290
+168
+323
 NIL
 produce-noise
 NIL
@@ -394,12 +391,29 @@ NIL
 1
 
 BUTTON
-60
-368
-156
-401
+63
+213
+159
+246
 NIL
 reproduce
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+0
+330
+210
+363
+go when speakers on
+move-with-speakers-on
 NIL
 1
 T
