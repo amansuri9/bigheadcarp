@@ -1,0 +1,96 @@
+- Plankton Growth is too much
+- Diffuse plankton
+- plankton growth breaks the computer 
+- reproduce but not dying? why? 
+- safe zone apply to speakers so the plankton don't grow over the speakers. 
+- Feed procedure working? or not working? 
+- escaping a procedures 
+- think back about the questions that we want to answer the questions
+- do not need reproduce
+- do not death 
+- 
+---Graphs---
+
+-Plankton graph - with fish graph on same plot
+-number of deaths of both fishes
+-live number of fish alive
+-
+
+
+-- Speakers ---
+
+Change some sizes....
+
+recursive algorithm 
+
+counter waves in combination of speakers -  look up 
+
+Projection of sound on a tick sets the color of its neighbors to the same color of the speaker in a cone of radius forward from the original speaker 
+
+ask patches with red loop set neighbors to find location of red with + - in y - in x to make 
+
+slider to show fish better at turning around at intensity. 
+
+patches own intensity of red that the fish get deterred based on intensity %% maybe. Density/intensity loss over distance or (change of acoustic properties?) - more speakers for more 
+
+inc dissapation of speakers then we need more speakers, then we can how much we need to install? 
+
+=========Go back and see if it is reasonable to think that things could change the acoustic properties of a river? 
+
+^ making assumptions about these models and speakers for our river in this situation -!= investigating specific questions. 
+
+* ignore deterrant based on food on side of speakers? if hungy could put up with the speaker based on a scale or a formula? -- if energy > current intensity then turn 
+
+Min num speakers neeed to be installed
+density
+number of speakers needed?
+
+if fish in radius change angle less than you want them to turn related to the intensity 
+
+check fish in patches in front of it to depend on turn radius - look ahead based on intensity of the patch to determine if the intensity to turn at X
+
+
+
+check yourself if there is a node above that is red? if no then affect. IF then statements sets
+
+if 0,1 !=red then -1,1 set .......
+
+for patch w/ intensity > 0 
+
+
+dissapation rate----------------- slider call once per tick
+
+or set self intensity to zero (to replicate some sound residue in a patch) 
+
+-- rather than setting intensity 
+need to take current state and decide what next state will be 
+then call to update and check them again
+
+
+ask patches with intensity to do this
+0,0
+if 0,1 !=red
+then -1, 1 set intensity intensity * .9
+if 0,-1 != red
+then -1,-1 set intensity something 
+set -1,0
+
+set self intensity 0.5 or something 
+
+
+
+set next intensity -  in game of life each cell has two traits living and live-neighbor, count live neighbers, ask patches to update condition - procedure based on live neighbors
+
+ask all patches is neighbor to right have intenssity 
+reverse logic for each cell to see if neighbors don't have 
+each cell would need setting right up right and right down to check the intensity of the cells 
+
+all one tick ()
+ask patches get neighbor intensity - take the max of intensity of neighbors
+ask patches set self intensity = * .9 neighbor intensity
+
+partic swarm if give fish a velocity in X and Y direction, then we can change their velocity in X and Y direction - more like velocity in X and velocity in Y and acceleration. 
+can declerate in X and accelerate in Y. 
+
+can define direction angle 
+set random then a range
