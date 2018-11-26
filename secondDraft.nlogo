@@ -195,14 +195,21 @@ to feed_normals ;;normal eat less plankton
 end
 
 to produce-noise ;; this needs to be some sort of resonating thing or added a probability for them to be transparaent at some tiems and have them blink;;
-ask patches [
+reset-ticks
+  ask patches [
     if (pcolor = black)
     [set pcolor red]
+  ]
+  ;; trying to make the fish stop when speakers go off
+  ask bigheads [
+    set cruise-speed 0
   ]
 ask bigheads [
     ;; turn red but originally will turn around and leave
     set heading -90
+    set cruise-speed 3
     ]
+tick
 end
 
 to swim
@@ -263,16 +270,15 @@ to move-with-speakers-on
   ]
   produce-noise
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
-210
+430
 10
-1401
-552
+1252
+386
 -1
 -1
-13.0
+8.95122
 1
 10
 1
@@ -293,10 +299,10 @@ ticks
 30.0
 
 BUTTON
-88
-37
-154
-70
+78
+10
+144
+43
 NIL
 setup
 NIL
@@ -310,10 +316,10 @@ NIL
 1
 
 SLIDER
-32
-88
-204
-121
+22
+45
+194
+78
 choose-normal-fish
 choose-normal-fish
 0
@@ -325,10 +331,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-18
-131
-203
-164
+14
+82
+199
+115
 choose-bighead-fish
 choose-bighead-fish
 0
@@ -340,10 +346,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-45
-174
-181
-207
+42
+121
+178
+154
 NIL
 plankton_growth
 NIL
@@ -358,9 +364,9 @@ NIL
 
 BUTTON
 -2
-252
+195
 213
-285
+228
 go when speakers off 
 move-with-speakers-off
 NIL
@@ -374,10 +380,10 @@ NIL
 1
 
 BUTTON
-44
-290
-168
-323
+46
+232
+170
+265
 NIL
 produce-noise
 NIL
@@ -391,10 +397,10 @@ NIL
 1
 
 BUTTON
-63
-213
-159
-246
+62
+158
+158
+191
 NIL
 reproduce
 NIL
@@ -408,10 +414,10 @@ NIL
 1
 
 BUTTON
-0
-330
-210
-363
+-1
+268
+209
+301
 go when speakers on
 move-with-speakers-on
 NIL
@@ -423,6 +429,37 @@ NIL
 NIL
 NIL
 1
+
+PLOT
+7
+311
+207
+461
+Population
+Number
+Time
+0.0
+10.0
+0.0
+10.0
+true
+false
+"set-plot-y-range 0 number" ""
+PENS
+"default" 1.0 0 -5987164 true "" "plot count bigheads"
+"pen-1" 1.0 0 -2674135 true "" "plot count normals"
+"pen-2" 1.0 0 -13840069 true "" "plot count patches with [pcolor = green]"
+
+MONITOR
+217
+415
+369
+460
+Bighead 
+Count bigheads
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
