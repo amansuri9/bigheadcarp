@@ -85,7 +85,7 @@ to setup
     set size 1
     ;; set normal fish to all colors except for gray so no confusion
     set color one-of remove gray base-colors
-    set cruise-speed 3 ; cruise speed is the fishes normal swim speed;
+    set cruise-speed 1 ; cruise speed is the fishes normal swim speed;
     set wiggle-angle 5 ; this will be used to apply 'normal' movement, to simulate some sort of swimming behavior
     set turn-angle 10 ; turn angle allows us to redirect the fish, this needs to be given a new number, so when the fish encouter the stimuli they will turn at this angle, a range of angles can also be added here;;
     ;set birth energy 25 ;; birth energy is a global variable tracked to allow us to spawn more fish
@@ -104,7 +104,7 @@ to setup
     ;; making bighead bigger
     set size 2
     set color grey
-    set cruise-speed 3
+    set cruise-speed 1
     set wiggle-angle 5
     set turn-angle 10
     ;set birth energy 25
@@ -114,6 +114,7 @@ to setup
     ;; turtle is now facing northeast
     set heading 90
     ]
+reset-ticks
 end
 ;; this is something else that we may want to remove later, the moving complex is a tad more complicated.
 ;to move-fish
@@ -195,21 +196,32 @@ to feed_normals ;;normal eat less plankton
 end
 
 to produce-noise ;; this needs to be some sort of resonating thing or added a probability for them to be transparaent at some tiems and have them blink;;
-reset-ticks
+;reset-ticks
   ask patches [
     if (pcolor = black)
     [set pcolor red]
-  ]
-  ;; trying to make the fish stop when speakers go off
-  ask bigheads [
-    set cruise-speed 0
   ]
 ask bigheads [
     ;; turn red but originally will turn around and leave
     set heading -90
     set cruise-speed 3
     ]
-tick
+;tick
+end
+
+
+to turnoff-noise ;; this needs to be some sort of resonating thing or added a probability for them to be transparaent at some tiems and have them blink;;
+  ask patches [
+    if (pcolor = red)
+    [set pcolor black]
+  ]
+ask bigheads [
+    ;; turn red but originally will turn around and leave
+;    set heading 45      ;; turtle rotated right
+;    set heading heading + 10 ;; same effect as "roll-right 10"
+    set heading 90
+    set cruise-speed 3
+    ]
 end
 
 to swim
@@ -233,6 +245,8 @@ end
 ;; GO BUTTON when speakers are NOT activated
 ;;;;;;;;;;;
 to move-with-speakers-off
+  tick
+;  reset-ticks
 ;;  plankton growth. If there is less than the threshold amount of plankton on a patch regrow it with a particular probability determined
 ;; by the growth rate. We also diffuse the plankton to allow for the fact that plankton drift.
   ask patches [
@@ -258,7 +272,20 @@ to move-with-speakers-off
   ;; base speed
   ask turtles [
     cruise
+
   ]
+
+; tick-advance 100
+;move-with-speakers-on
+;  tick-advance 200
+;move-with-speakers-off2
+   if ticks mod 100 = 0 [
+    move-with-speakers-on
+]
+ if ticks mod 300 = 0 [
+    move-with-speakers-off2
+]
+;;tick
 end
 
 ;; GO BUTTON when speakers are activated
@@ -269,6 +296,16 @@ to move-with-speakers-on
     cruise
   ]
   produce-noise
+end
+
+to move-with-speakers-off2
+    ask patches [
+    if (pcolor = red)
+    [set pcolor black]
+  ]
+  ask turtles [
+    cruise
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -369,7 +406,7 @@ BUTTON
 228
 go when speakers off 
 move-with-speakers-off
-NIL
+T
 1
 T
 OBSERVER
@@ -420,7 +457,7 @@ BUTTON
 301
 go when speakers on
 move-with-speakers-on
-NIL
+T
 1
 T
 OBSERVER
@@ -460,6 +497,34 @@ Count bigheads
 17
 1
 11
+
+BUTTON
+254
+246
+370
+279
+NIL
+turnoff-noise
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SWITCH
+271
+177
+383
+210
+noise
+noise
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
